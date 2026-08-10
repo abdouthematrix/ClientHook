@@ -8,5 +8,13 @@
     "enable_redirect": false,
     "ip": "192.168.1.5",
     "port": 19000
-  }
+  },
+
+  "home": "",
+  "forum": "",
+  "credit": "",
+  "signup": "",
+  "signout": ""
+
+
 }
