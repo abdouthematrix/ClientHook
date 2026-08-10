@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ClientHook": {
+      "commandName": "Project",
+      "debugEngines": "managed,native"
+    }
+  }
+}

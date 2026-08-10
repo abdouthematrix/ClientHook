@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>ClientHook.Launcher</RootNamespace>
+    <AssemblyName>ClientHook.Launcher</AssemblyName>
+    <Platforms>x84</Platforms>
+    <LangVersion>latest</LangVersion>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>    
+    <!-- for FolderBrowserDialog -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>neo_icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+   <ItemGroup>
+    <PackageReference Include="EasyHook" Version="2.7.7097" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClientHook\ClientHook.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="..\ClientHook\ClientHookConfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="neo_icon.ico" />    
+  </ItemGroup>
+
+</Project>
