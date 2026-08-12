@@ -28,6 +28,7 @@ namespace ClientHook.Launcher
 
             CLIENTDirectoryTextBox.Text = "C:\\Users\\AbdouMatrix\\Downloads\\CO\\6159";
             CLIENTExecutableTextBox.Text = "Conquer.exe";
+            ArgumentsTextBox.Text = "blacknull";
         }
 
         private void BrowseButton_Click(object sender, RoutedEventArgs e)

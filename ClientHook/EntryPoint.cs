@@ -28,6 +28,7 @@ namespace ClientHook
             FlashHook.Install(_cfg);
             PacketHook.Install(_cfg);
 
+            RemoteHooking.WakeUpProcess();
             // Keep thread alive
             try
             {
