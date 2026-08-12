@@ -4,17 +4,34 @@
     "ip": "192.168.1.5",
     "port": 9960
   },
+
   "game_server": {
     "enable_redirect": false,
     "ip": "192.168.1.5",
     "port": 19000
   },
 
-  "home": "",
-  "forum": "",
-  "credit": "",
-  "signup": "",
-  "signout": ""
+  "websites": {
+    "home": "",
+    "forum": "",
+    "credit": "",
+    "signup": "",
+    "signout": ""
+  },
 
+  "hooks": {
+    "connect": true,
+    "website": true,
+    "flash": true
+  },
 
+  "packet_logging": {
+    "enabled": true,
+    "log_path": "ClientHook.Packet.log",
+    "viewer": true,
+    "send_pattern_hex": "56 68 4C 04 ?? ?? 8B F1 E8 ?? ?? ?? ?? 8B C8 E8 ?? ?? ?? ?? 84 C0 75",
+    "receive_pattern_hex": "68 ?? ?? ?? ?? B8 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 75 ?? 85 F6 0F 84 ?? ?? ?? ?? 8B ?? ?? 81 FF",
+    "send_packet_offset": 4,
+    "max_payload_length": 1021
+  }
 }

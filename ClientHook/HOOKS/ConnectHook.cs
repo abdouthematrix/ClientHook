@@ -35,6 +35,11 @@ namespace ClientHook
 
         public static bool Install(ClientConfig cfg)
         {
+            if (!cfg.ConnectHookEnabled)
+            {
+                Log.Info("  [SKIP] ConnectHook disabled by config");
+                return false;
+            }
             try
             {
                 _cfg = cfg;

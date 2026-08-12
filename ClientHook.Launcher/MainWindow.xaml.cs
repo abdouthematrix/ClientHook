@@ -102,9 +102,8 @@ namespace ClientHook.Launcher
             catch (Exception ex)
             {               
                 SetStatus($"Injection failed: {ex.Message}", isError: true);
-                return;
-            }            
-
+                Log($"Injection failed: {ex.Message}");
+            }   
             SetLaunching(false);
         }
 

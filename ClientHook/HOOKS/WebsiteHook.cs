@@ -36,6 +36,11 @@ namespace ClientHook
 
         public static bool Install(ClientConfig cfg)
         {
+            if (!cfg.WebsiteHookEnabled)
+            {
+                Log.Info("  [SKIP] WebsiteHook disabled by config");
+                return false;
+            }
             try
             {
                 _cfg = cfg;

@@ -17,8 +17,13 @@ namespace ClientHook
 
         private static LocalHook _hook;
 
-        public static bool Install()
+        public static bool Install(ClientConfig cfg)
         {
+            if (!cfg.FlashHookEnabled)
+            {
+                Log.Info("  [SKIP] FlashHook disabled by config");
+                return false;
+            }
             try
             {
                 _hook = LocalHook.Create(
