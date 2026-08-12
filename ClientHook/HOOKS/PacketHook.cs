@@ -10,11 +10,13 @@ namespace ClientHook
     /// </summary>
     public sealed class PacketHook
     {
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
-        private delegate int SendMsgDelegate(IntPtr socket, IntPtr buffer, int length, int flags);
+        // Send uses ThisCall. Passes 'this' in the ECX register.
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        private delegate int SendMsgDelegate(IntPtr thisPtr);
 
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
-        private delegate int ReceiveMsgDelegate(IntPtr socket, IntPtr buffer, int length, int flags);
+        // Receive uses Cdecl. Arguments: Opcode, Buffer Pointer, Explicit Length Descriptor
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate byte ReceiveMsgDelegate(uint opcode, IntPtr packetBuffer, int packetLength);
 
         private static LocalHook _sendHook;
         private static LocalHook _recvHook;
@@ -26,6 +28,12 @@ namespace ClientHook
         public static bool SendHookInstalled { get; private set; }
         public static bool ReceiveHookInstalled { get; private set; }
 
+        // Outgoing packet buffer offset within the SendMsg "this" instance, and the max payload
+        // length used for the (Length - 4) < MaxPayloadLength sanity check on both directions --
+        // both taken verbatim from the reference source's reversed constants.
+        public static int SendPacketOffset { get; set; } = 4;
+        public static int MaxPayloadLength { get; set; } = 0x3FD;
+
         public static bool Install(ClientConfig cfg)
         {
             if (!cfg.PacketLoggingEnabled)
@@ -34,6 +42,8 @@ namespace ClientHook
                 return false;
             }
 
+            SendPacketOffset = cfg.SendPacketOffset;
+            MaxPayloadLength = cfg.MaxPayloadLength;
             try
             {
                 _logger = new PacketLogger(cfg.PacketLogPath) { ShowViewer = cfg.PacketViewerEnabled };
@@ -105,39 +115,55 @@ namespace ClientHook
             SendHookInstalled = false;
             ReceiveHookInstalled = false;
         }
-
-        private static int SendMsgDetour(IntPtr socket, IntPtr buffer, int length, int flags)
+        
+        private static int SendMsgDetour(IntPtr thisPtr)
         {
             try
             {
-                byte[] data = new byte[length];
-                Marshal.Copy(buffer, data, 0, length);
-                _logger.LogPacket(PacketDirection.Send, data);
+                if (thisPtr != IntPtr.Zero)
+                {
+                    IntPtr packetPtr = IntPtr.Add(thisPtr, SendPacketOffset);
+                    ushort length = (ushort)Marshal.ReadInt16(packetPtr);
+                    if ((uint)(length - 4) < (uint)MaxPayloadLength)
+                    {
+                        var data = new byte[length];
+                        Marshal.Copy(packetPtr, data, 0, length);
+                        _logger.LogPacket(PacketDirection.Send, data);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 Log.Info($"[PacketHook] SendDetour error: {ex.Message}");
             }
 
-            return _originalSend(socket, buffer, length, flags);
-        }
+            // Always call the real original -- this hook never fabricates or alters a send.
+            return _originalSend(thisPtr);
+        }        
 
-        private static int ReceiveMsgDetour(IntPtr socket, IntPtr buffer, int length, int flags)
+        private static byte ReceiveMsgDetour(uint opcode, IntPtr packetBuffer, int packetLength)
         {
-            int result = _originalReceive(socket, buffer, length, flags);
+            // Execute the original game logic first so the buffer stays populated and unmodified
+            // by the time we read it for logging.
+            byte result = _originalReceive(opcode, packetBuffer, packetLength);
 
-            if (result > 0)
+            try
             {
-                try
+                if (packetBuffer != IntPtr.Zero)
                 {
-                    byte[] data = new byte[result];
-                    Marshal.Copy(buffer, data, 0, result);
-                    _logger.LogPacket(PacketDirection.Receive, data);
+                    short length = Marshal.ReadInt16(packetBuffer);
+
+                    if ((uint)(length - 4) < (uint)MaxPayloadLength)
+                    {
+                        var data = new byte[length];
+                        Marshal.Copy(packetBuffer, data, 0, length);
+                        _logger.LogPacket(PacketDirection.Receive, data, opcode);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Log.Info($"[PacketHook] RecvDetour error: {ex.Message}");
-                }
+            }
+            catch (Exception ex)
+            {
+                Log.Info($"[PacketHook] RecvDetour error: {ex.Message}");
             }
 
             return result;

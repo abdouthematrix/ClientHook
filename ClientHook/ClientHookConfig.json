@@ -22,7 +22,7 @@
   "hooks": {
     "connect": true,
     "website": true,
-    "flash": true
+    "flash": false
   },
 
   "packet_logging": {
