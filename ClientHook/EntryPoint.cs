@@ -25,6 +25,7 @@ namespace ClientHook
             Log.Info("[HookManager] Installing early hooks...");
             ConnectHook.Install(_cfg);
             WebsiteHook.Install(_cfg);
+            FlashHook.Install();
 
             // Keep thread alive
             try
@@ -37,6 +38,7 @@ namespace ClientHook
             }
             ConnectHook.UnInstall();
             WebsiteHook.UnInstall();
+            FlashHook.UnInstall();
             // Finalise cleanup of hooks
             LocalHook.Release();
         }
