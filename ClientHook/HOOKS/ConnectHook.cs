@@ -71,7 +71,9 @@ namespace ClientHook
 
             try
             {
-                if (_cfg.AccountServerRedirect && port == _cfg.AccountServerPort)
+                if (_cfg.AccountServerRedirect &&
+                ((port >= 9950 && port <= 9980) ||
+                 (port >= 16000 && port <= 16010)))
                 {
                     inet_pton(AddressFamily.InterNetwork.GetHashCode(), _cfg.AccountServerIP, out uint addr);
                     name.sin_addr = addr;
@@ -79,7 +81,9 @@ namespace ClientHook
 
                     Log.Info($"[ConnectHook] AccountServer -> {_cfg.AccountServerIP}:{_cfg.AccountServerPort}");
                 }
-                else if (_cfg.GameServerRedirect && port == _cfg.GameServerPort)
+                else if (_cfg.GameServerRedirect &&
+                    ((port >= 5810 && port <= 5820) ||
+                 (port >= 19000 && port <= 19010)))
                 {
                     inet_pton(AddressFamily.InterNetwork.GetHashCode(), _cfg.GameServerIP, out uint addr);
                     name.sin_addr = addr;
